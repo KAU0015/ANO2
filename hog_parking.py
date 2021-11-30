@@ -72,7 +72,8 @@ train_images_free = [img for img in glob.glob("train_images/free/*.png")]
 train_labels_list = []
 train_images_list = []
 IMG_SIZE = 96
-hog = cv2.HOGDescriptor((IMG_SIZE, IMG_SIZE), (32,32), (16,16), (8,8), 9, 1, -1, 0, 0.2, 1, 64, True)
+#hog = cv2.HOGDescriptor((IMG_SIZE, IMG_SIZE), (32,32), (16,16), (8,8), 9, 1, -1, 0, 0.2, 1, 64, True)
+hog = cv2.HOGDescriptor((IMG_SIZE, IMG_SIZE), (64, 64), (32, 32), (16, 16), 9, 1, -1, 0, 0.09, 1, 64, True)
 svm = cv2.ml.SVM_create()
 svm.setType(cv2.ml.SVM_C_SVC)
 svm.setKernel(cv2.ml.SVM_INTER)
@@ -130,10 +131,10 @@ for img in test_images:
 
         if(predict_label == 0):
             result_list.append(0)
-            cv2.line(one_park_image, (int(one_c[0]), int(one_c[1])), (int(one_c[2]), int(one_c[3])), (0,0,255), 2)
-            cv2.line(one_park_image, (int(one_c[2]), int(one_c[3])), (int(one_c[4]), int(one_c[5])), (0,0,255), 2)
-            cv2.line(one_park_image, (int(one_c[4]), int(one_c[5])), (int(one_c[6]), int(one_c[7])), (0,0,255), 2)
-            cv2.line(one_park_image, (int(one_c[6]), int(one_c[7])), (int(one_c[0]), int(one_c[1])), (0,0,255), 2)
+            cv2.line(one_park_image, (int(one_c[0]), int(one_c[1])), (int(one_c[2]), int(one_c[3])), (255,0,0), 2)
+            cv2.line(one_park_image, (int(one_c[2]), int(one_c[3])), (int(one_c[4]), int(one_c[5])), (255,0,0), 2)
+            cv2.line(one_park_image, (int(one_c[4]), int(one_c[5])), (int(one_c[6]), int(one_c[7])), (255,0,0), 2)
+            cv2.line(one_park_image, (int(one_c[6]), int(one_c[7])), (int(one_c[0]), int(one_c[1])), (255,0,0), 2)
         else:
             result_list.append(1)
             cv2.line(one_park_image, (int(one_c[0]), int(one_c[1])), (int(one_c[2]), int(one_c[3])), (0,0,255), 2)
