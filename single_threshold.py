@@ -92,38 +92,19 @@ def main(argv):
             warped_image = four_point_transform(one_park_image, np.array(pts))
             res_image = cv2.resize(warped_image, (80, 80))
             
-            blur_image = cv2.GaussianBlur(res_image,(5,5),0)
+            blur_image = cv2.GaussianBlur(res_image,(3,3),0)
             
             gray_image = cv2.cvtColor(blur_image, cv2.COLOR_BGR2GRAY)
             edge_image = cv2.Canny(gray_image, 40, 120)  
-            count = cv2.countNonZero(edge_image)   
-
-            if float(one_c[1]) < 260 and count > 300:
-               result_list.append(1)
-               cv2.line(one_park_image, (int(one_c[0]), int(one_c[1])), (int(one_c[2]), int(one_c[3])), (0,0,255), 2)
-               cv2.line(one_park_image, (int(one_c[2]), int(one_c[3])), (int(one_c[4]), int(one_c[5])), (0,0,255), 2)
-               cv2.line(one_park_image, (int(one_c[4]), int(one_c[5])), (int(one_c[6]), int(one_c[7])), (0,0,255), 2)
-               cv2.line(one_park_image, (int(one_c[6]), int(one_c[7])), (int(one_c[0]), int(one_c[1])), (0,0,255), 2)
-            elif float(one_c[1]) < 370 and count > 520:
-               result_list.append(1)
-               cv2.line(one_park_image, (int(one_c[0]), int(one_c[1])), (int(one_c[2]), int(one_c[3])), (0,0,255), 2)
-               cv2.line(one_park_image, (int(one_c[2]), int(one_c[3])), (int(one_c[4]), int(one_c[5])), (0,0,255), 2)
-               cv2.line(one_park_image, (int(one_c[4]), int(one_c[5])), (int(one_c[6]), int(one_c[7])), (0,0,255), 2)
-               cv2.line(one_park_image, (int(one_c[6]), int(one_c[7])), (int(one_c[0]), int(one_c[1])), (0,0,255), 2)
-            elif float(one_c[1]) < 590 and count > 490:
-               result_list.append(1)
-               cv2.line(one_park_image, (int(one_c[0]), int(one_c[1])), (int(one_c[2]), int(one_c[3])), (0,0,255), 2)
-               cv2.line(one_park_image, (int(one_c[2]), int(one_c[3])), (int(one_c[4]), int(one_c[5])), (0,0,255), 2)
-               cv2.line(one_park_image, (int(one_c[4]), int(one_c[5])), (int(one_c[6]), int(one_c[7])), (0,0,255), 2)
-               cv2.line(one_park_image, (int(one_c[6]), int(one_c[7])), (int(one_c[0]), int(one_c[1])), (0,0,255), 2)
-            elif float(one_c[1]) >= 590 and count > 320:
-               result_list.append(1)
-               cv2.line(one_park_image, (int(one_c[0]), int(one_c[1])), (int(one_c[2]), int(one_c[3])), (0,0,255), 2)
-               cv2.line(one_park_image, (int(one_c[2]), int(one_c[3])), (int(one_c[4]), int(one_c[5])), (0,0,255), 2)
-               cv2.line(one_park_image, (int(one_c[4]), int(one_c[5])), (int(one_c[6]), int(one_c[7])), (0,0,255), 2)
-               cv2.line(one_park_image, (int(one_c[6]), int(one_c[7])), (int(one_c[0]), int(one_c[1])), (0,0,255), 2)
+            count = cv2.countNonZero(edge_image)
+			
+            if count < 478:
+                #print("Parking cell is empty!")
+                result_list.append(0)
             else:
-               result_list.append(0)
+                #print("Parking cell is occupied.")
+                result_list.append(1)
+
          #   print(count)
           #  if(count < 485):#350
               #  print("empty")
@@ -141,7 +122,7 @@ def main(argv):
            # cv2.imshow('edge_image', edge_image)
             #cv2.waitKey()      
             #roi = img[y:y+h, x:x+w]
-            cv2.putText(one_park_image, str(count), (int(one_c[0]), int(one_c[1])), cv2.FONT_HERSHEY_PLAIN, 1.5, (0, 0, 0), 2)
+          #  cv2.putText(one_park_image, str(count), (int(one_c[0]), int(one_c[1])), cv2.FONT_HERSHEY_PLAIN, 1.5, (0, 0, 0), 2)
        # cv2.imshow('one_park_image', one_park_image)
         key = cv2.waitKey(0)
         if key == 27: # exit on ESC
