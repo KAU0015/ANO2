@@ -93,7 +93,7 @@ train_images_list_lbp = []
 IMG_SIZE = 32
 
 
-net = torch.load("my_lexnet.pth")
+net = torch.load("my_alexnet_10_epochs.pth")
 
 #svm.setTermCriteria((cv2.TERM_CRITERIA_MAX_ITER, 1000, 1e-6))
 
