@@ -93,7 +93,7 @@ train_images_list_lbp = []
 IMG_SIZE = 32
 
 
-net = torch.load("my_LeNet.pth")
+net = torch.load("my_LeNet_20_epochs.pth")
 
 #svm.setTermCriteria((cv2.TERM_CRITERIA_MAX_ITER, 1000, 1e-6))
 
@@ -137,7 +137,7 @@ for img in test_images:
         image_pytorch = image_pytorch.unsqueeze(0)
         output_pytorch = net(image_pytorch)
         _, predicted = torch.max(output_pytorch, 1)
-        print(predicted)
+    #    print(predicted)
 
         #hog_feature = hog.compute(gray_image)
     #    predict_label = svm.predict(np.array(hog_feature).reshape(1, -1))
