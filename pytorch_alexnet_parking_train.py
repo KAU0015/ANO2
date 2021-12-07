@@ -16,7 +16,7 @@ transform = transforms.Compose([
     
 ])
 
-batch_size = 8
+batch_size = 32
 data_dir = 'train_images'
 image_datasets = datasets.ImageFolder(data_dir, transform=transform)
 data_loader = torch.utils.data.DataLoader(image_datasets, batch_size=batch_size, shuffle=True, num_workers=8)
@@ -82,7 +82,7 @@ def main():
                 running_loss = 0.0
 
     print('Finished Training')
-    PATH = './my_alexnet_10_epochs.pth'
+    PATH = './my_alexnet_epochs_10_32.pth'
     torch.save(net, PATH)
 
 

@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import torch.optim as optim
 import torch.nn.functional as F
 import os
+import time
 
 
 transform = transforms.Compose([
@@ -16,11 +17,11 @@ transform = transforms.Compose([
     
 ])
 
-batch_size = 18
+batch_size = 32
 data_dir = 'train_images'
 image_datasets = datasets.ImageFolder(data_dir, transform=transform)
-data_loader = torch.utils.data.DataLoader(image_datasets, batch_size=batch_size, shuffle=True, num_workers=8)
-print(image_datasets)
+data_loader = torch.utils.data.DataLoader(image_datasets, batch_size=batch_size, shuffle=True, num_workers=12)
+#print(image_datasets)
 
 classes = ('free', 'full')
 
@@ -50,16 +51,16 @@ def vgg(conv_arch):
     return nn.Sequential(
         *conv_blks, nn.Flatten(),
         # The fully-connected part
-        nn.Linear(out_channels * 7 * 7, 4096), nn.BatchNorm1d(4096), nn.ReLU(), nn.Dropout(0.5),
-        nn.Linear(4096, 4096), nn.BatchNorm1d(4096), nn.ReLU(), nn.Dropout(0.5),
-        nn.Linear(4096, 10))
+        nn.Linear(out_channels * 7 * 7, 4096), nn.ReLU(), nn.Dropout(0.5),
+        nn.Linear(4096, 4096), nn.ReLU(), nn.Dropout(0.5),
+        nn.Linear(4096, 2))
 
 def main():
     dataiter = iter(data_loader)
     images, labels = dataiter.next()
     print(' '.join('%5s' % classes[labels[j]] for j in range(batch_size)))
 
-    imshow(torchvision.utils.make_grid(images))
+   # imshow(torchvision.utils.make_grid(images))
     conv_arch = ((1, 64), (1, 128), (2, 256), (2, 512), (2, 512))
     net = vgg(conv_arch)
 
@@ -69,8 +70,9 @@ def main():
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
+    start = time.time()
 
-    for epoch in range(1):  # loop over the dataset multiple times
+    for epoch in range(3):  # loop over the dataset multiple times
 
         running_loss = 0.0
         for i, data in enumerate(data_loader, 0):
@@ -94,7 +96,10 @@ def main():
                 running_loss = 0.0
 
     print('Finished Training')
-    PATH = './my_vggnet.pth'
+    end = time.time()
+    train_time = end - start
+    print(f"Training time (s): {round(train_time, 5)}")
+    PATH = './my_vggnet_3_epochs_batch_32.pth'
     torch.save(net, PATH)
 
 

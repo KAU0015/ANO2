@@ -16,7 +16,7 @@ transform = transforms.Compose([
     
 ])
 
-batch_size = 8
+batch_size = 64
 data_dir = 'train_images'
 image_datasets = datasets.ImageFolder(data_dir, transform=transform)
 data_loader = torch.utils.data.DataLoader(image_datasets, batch_size=batch_size, shuffle=True, num_workers=12)
@@ -58,7 +58,7 @@ def main():
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 
-    for epoch in range(20):  # loop over the dataset multiple times
+    for epoch in range(30):  # loop over the dataset multiple times
 
         running_loss = 0.0
         for i, data in enumerate(data_loader, 0):
@@ -82,7 +82,7 @@ def main():
                 running_loss = 0.0
 
     print('Finished Training')
-    PATH = './my_LeNet_20_epochs.pth'
+    PATH = './my_LeNet_30_epochs_64.pth'
     torch.save(net, PATH)
 
 

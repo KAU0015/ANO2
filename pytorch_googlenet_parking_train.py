@@ -37,19 +37,18 @@ class Inception(nn.Module):
 
     def forward(self, x):
         p1 = F.relu(self.p1_2(self.p1_1(x)))
-        p2 = F.relu(self.p2_3(self.p2_2(F.relu(self.p2_2(self.p2_1(x))))))
-        p3 = F.relu(self.p3_3(self.p3_2(F.relu(self.p3_2(self.p3_1(x))))))
+        p2 = F.relu(self.p2_4(self.p2_3(F.relu(self.p2_2(self.p2_1(x))))))
+        p3 = F.relu(self.p3_4(self.p3_3(F.relu(self.p3_2(self.p3_1(x))))))
         p4 = F.relu(self.p4_3(self.p4_2(self.p4_1(x))))
         # Concatenate the outputs on the channel dimension
         return torch.cat((p1, p2, p3, p4), dim=1)
 
 transform = transforms.Compose([
     transforms.ToTensor(),
-    transforms.Resize(96)
-    
+    transforms.Resize(224)
 ])
 
-batch_size = 18
+batch_size = 32
 data_dir = 'train_images'
 image_datasets = datasets.ImageFolder(data_dir, transform=transform)
 data_loader = torch.utils.data.DataLoader(image_datasets, batch_size=batch_size, shuffle=True, num_workers=8)
@@ -124,7 +123,7 @@ def main():
                 running_loss = 0.0
 
     print('Finished Training')
-    PATH = './my_googlenet.pth'
+    PATH = './my_googlenet_1_epochs_batch_32.pth'
     torch.save(net, PATH)
 
 

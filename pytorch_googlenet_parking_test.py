@@ -40,17 +40,16 @@ class Inception(nn.Module):
 
     def forward(self, x):
         p1 = F.relu(self.p1_2(self.p1_1(x)))
-        p2 = F.relu(self.p2_3(self.p2_2(F.relu(self.p2_2(self.p2_1(x))))))
-        p3 = F.relu(self.p3_3(self.p3_2(F.relu(self.p3_2(self.p3_1(x))))))
+        p2 = F.relu(self.p2_4(self.p2_3(F.relu(self.p2_2(self.p2_1(x))))))
+        p3 = F.relu(self.p3_4(self.p3_3(F.relu(self.p3_2(self.p3_1(x))))))
         p4 = F.relu(self.p4_3(self.p4_2(self.p4_1(x))))
         # Concatenate the outputs on the channel dimension
         return torch.cat((p1, p2, p3, p4), dim=1)
 
-
 transform = transforms.Compose([
-    transforms.ToTensor(),
-    transforms.Resize(96)
-    
+    transforms.Resize(224),
+    #transforms.CenterCrop(224),
+    transforms.ToTensor()
 ])
 
 def order_points(pts):
@@ -123,28 +122,20 @@ train_images_free = [img for img in glob.glob("train_images/free/*.png")]
 train_labels_list = []
 train_images_list = []
 train_images_list_lbp = []
-IMG_SIZE = 96
+IMG_SIZE = 224
 
 
-net = torch.load("my_googlenet.pth")
+net = torch.load("my_googlenet_1_epochs_batch_32.pth")
+net.eval()
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-#svm.setTermCriteria((cv2.TERM_CRITERIA_MAX_ITER, 1000, 1e-6))
 
 for i in range(len(train_images_full)):
-    one_park_image = cv2.imread(train_images_full[i], 0)
-    res_image = cv2.resize(one_park_image, (IMG_SIZE, IMG_SIZE))
-   # hog_feature = hog.compute(res_image)
-  #  train_images_list.append(hog_feature)
     train_labels_list.append(1)
-    train_images_list_lbp.append(res_image)
 
 for i in range(len(train_images_free)):
-    one_park_image = cv2.imread(train_images_free[i], 0)
-    res_image = cv2.resize(one_park_image, (IMG_SIZE, IMG_SIZE))
-  #  hog_feature = hog.compute(res_image)
-  #  train_images_list.append(hog_feature)
     train_labels_list.append(0)
-    train_images_list_lbp.append(res_image)
+
 
 
 test_images = [img for img in glob.glob("test_images/*.jpg")]
@@ -160,38 +151,29 @@ for img in test_images:
                 ((float(one_c[2])), float(one_c[3])),
                 ((float(one_c[4])), float(one_c[5])),
                 ((float(one_c[6])), float(one_c[7]))] 
-        #print(pts)
-        #https://www.pyimagesearch.com/2014/08/25/4-point-opencv-getperspective-transform-example/
+
         warped_image = four_point_transform(one_park_image, np.array(pts))
         res_image = cv2.resize(warped_image, (IMG_SIZE, IMG_SIZE)) 
         one_img_rgb = cv2.cvtColor(res_image, cv2.COLOR_BGR2RGB)
         img_pil = Image.fromarray(one_img_rgb)
-        image_pytorch = transform(img_pil) #.to(device)
+        image_pytorch = transform(img_pil).to(device)
         image_pytorch = image_pytorch.unsqueeze(0)
         output_pytorch = net(image_pytorch)
         _, predicted = torch.max(output_pytorch, 1)
         #print(predicted)
 
-        #hog_feature = hog.compute(gray_image)
-    #    predict_label = svm.predict(np.array(hog_feature).reshape(1, -1))
-     #   predict_label = predict_label[1][0][0]
-        #print(predict_label)
-    
-       # predict_label_lbp, predict_confidence_lbp = LBP_recognizer.predict(gray_image)
-      #  print(predict_label_lbp)
-
         if(predicted == 1):
             result_list.append(1)
-            cv2.line(one_park_image, (int(one_c[0]), int(one_c[1])), (int(one_c[2]), int(one_c[3])), (0,0,255), 2)
-            cv2.line(one_park_image, (int(one_c[2]), int(one_c[3])), (int(one_c[4]), int(one_c[5])), (0,0,255), 2)
-            cv2.line(one_park_image, (int(one_c[4]), int(one_c[5])), (int(one_c[6]), int(one_c[7])), (0,0,255), 2)
-            cv2.line(one_park_image, (int(one_c[6]), int(one_c[7])), (int(one_c[0]), int(one_c[1])), (0,0,255), 2)
+         #   cv2.line(one_park_image, (int(one_c[0]), int(one_c[1])), (int(one_c[2]), int(one_c[3])), (0,0,255), 2)
+         #   cv2.line(one_park_image, (int(one_c[2]), int(one_c[3])), (int(one_c[4]), int(one_c[5])), (0,0,255), 2)
+         #   cv2.line(one_park_image, (int(one_c[4]), int(one_c[5])), (int(one_c[6]), int(one_c[7])), (0,0,255), 2)
+         #   cv2.line(one_park_image, (int(one_c[6]), int(one_c[7])), (int(one_c[0]), int(one_c[1])), (0,0,255), 2)
         else:
             result_list.append(0)
-            cv2.line(one_park_image, (int(one_c[0]), int(one_c[1])), (int(one_c[2]), int(one_c[3])), (0,255,0), 2)
-            cv2.line(one_park_image, (int(one_c[2]), int(one_c[3])), (int(one_c[4]), int(one_c[5])), (0,255,0), 2)
-            cv2.line(one_park_image, (int(one_c[4]), int(one_c[5])), (int(one_c[6]), int(one_c[7])), (0,255,0), 2)
-            cv2.line(one_park_image, (int(one_c[6]), int(one_c[7])), (int(one_c[0]), int(one_c[1])), (0,255,0), 2)
+         #   cv2.line(one_park_image, (int(one_c[0]), int(one_c[1])), (int(one_c[2]), int(one_c[3])), (0,255,0), 2)
+          #  cv2.line(one_park_image, (int(one_c[2]), int(one_c[3])), (int(one_c[4]), int(one_c[5])), (0,255,0), 2)
+          #  cv2.line(one_park_image, (int(one_c[4]), int(one_c[5])), (int(one_c[6]), int(one_c[7])), (0,255,0), 2)
+          #  cv2.line(one_park_image, (int(one_c[6]), int(one_c[7])), (int(one_c[0]), int(one_c[1])), (0,255,0), 2)
 
    # cv2.imshow('one_park_image', one_park_image)
  #   key = cv2.waitKey(0)
