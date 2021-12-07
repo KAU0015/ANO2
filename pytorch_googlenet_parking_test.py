@@ -125,7 +125,7 @@ train_images_list_lbp = []
 IMG_SIZE = 224
 
 
-net = torch.load("my_googlenet_1_epochs_batch_32.pth")
+net = torch.load("my_googlenet_5_epochs_batch_32.pth")
 net.eval()
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 

@@ -20,7 +20,7 @@ transform = transforms.Compose([
 batch_size = 32
 data_dir = 'train_images'
 image_datasets = datasets.ImageFolder(data_dir, transform=transform)
-data_loader = torch.utils.data.DataLoader(image_datasets, batch_size=batch_size, shuffle=True, num_workers=12)
+data_loader = torch.utils.data.DataLoader(image_datasets, batch_size=batch_size, shuffle=True, num_workers=10)
 #print(image_datasets)
 
 classes = ('free', 'full')
@@ -72,7 +72,7 @@ def main():
     optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
     start = time.time()
 
-    for epoch in range(3):  # loop over the dataset multiple times
+    for epoch in range(5):  # loop over the dataset multiple times
 
         running_loss = 0.0
         for i, data in enumerate(data_loader, 0):
@@ -99,7 +99,7 @@ def main():
     end = time.time()
     train_time = end - start
     print(f"Training time (s): {round(train_time, 5)}")
-    PATH = './my_vggnet_3_epochs_batch_32.pth'
+    PATH = './my_vggnet_5_epochs_batch_32.pth'
     torch.save(net, PATH)
 
 
