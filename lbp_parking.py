@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import glob
+import time
 
 def order_points(pts):
 	# initialzie a list of coordinates that will be ordered
@@ -73,7 +74,7 @@ train_labels_list = []
 train_images_list = []
 train_images_list_lbp = []
 IMG_SIZE = 96
-hog = cv2.HOGDescriptor((IMG_SIZE, IMG_SIZE), (32,32), (16,16), (8,8), 9, 1, -1, 0, 0.2, 1, 64, True)
+#hog = cv2.HOGDescriptor((IMG_SIZE, IMG_SIZE), (32,32), (16,16), (8,8), 9, 1, -1, 0, 0.2, 1, 64, True)
 svm = cv2.ml.SVM_create()
 svm.setType(cv2.ml.SVM_C_SVC)
 svm.setKernel(cv2.ml.SVM_INTER)
@@ -100,7 +101,11 @@ for i in range(len(train_images_free)):
 print("train_all ", len(train_images_list_lbp))
 
 LBP_recognizer = cv2.face.LBPHFaceRecognizer_create()
+start = time.time()
 LBP_recognizer.train(train_images_list_lbp, np.array(train_labels_list))
+end = time.time()
+train_time = end - start
+print(f"Training time (s): {round(train_time, 5)}")
 
 #svm.train(np.array(train_images_list), cv2.ml.ROW_SAMPLE, np.array(train_labels_list))
 #svm.save("my_hog.xml")
@@ -137,16 +142,16 @@ for img in test_images:
 
         if(predict_label_lbp == 1):
             result_list.append(1)
-            cv2.line(one_park_image, (int(one_c[0]), int(one_c[1])), (int(one_c[2]), int(one_c[3])), (0,0,255), 2)
-            cv2.line(one_park_image, (int(one_c[2]), int(one_c[3])), (int(one_c[4]), int(one_c[5])), (0,0,255), 2)
-            cv2.line(one_park_image, (int(one_c[4]), int(one_c[5])), (int(one_c[6]), int(one_c[7])), (0,0,255), 2)
-            cv2.line(one_park_image, (int(one_c[6]), int(one_c[7])), (int(one_c[0]), int(one_c[1])), (0,0,255), 2)
+           # cv2.line(one_park_image, (int(one_c[0]), int(one_c[1])), (int(one_c[2]), int(one_c[3])), (0,0,255), 2)
+        #    cv2.line(one_park_image, (int(one_c[2]), int(one_c[3])), (int(one_c[4]), int(one_c[5])), (0,0,255), 2)
+         #   cv2.line(one_park_image, (int(one_c[4]), int(one_c[5])), (int(one_c[6]), int(one_c[7])), (0,0,255), 2)
+         #   cv2.line(one_park_image, (int(one_c[6]), int(one_c[7])), (int(one_c[0]), int(one_c[1])), (0,0,255), 2)
         else:
             result_list.append(0)
-            cv2.line(one_park_image, (int(one_c[0]), int(one_c[1])), (int(one_c[2]), int(one_c[3])), (0,255,0), 2)
-            cv2.line(one_park_image, (int(one_c[2]), int(one_c[3])), (int(one_c[4]), int(one_c[5])), (0,255,0), 2)
-            cv2.line(one_park_image, (int(one_c[4]), int(one_c[5])), (int(one_c[6]), int(one_c[7])), (0,255,0), 2)
-            cv2.line(one_park_image, (int(one_c[6]), int(one_c[7])), (int(one_c[0]), int(one_c[1])), (0,255,0), 2)
+          #  cv2.line(one_park_image, (int(one_c[0]), int(one_c[1])), (int(one_c[2]), int(one_c[3])), (0,255,0), 2)
+          #  cv2.line(one_park_image, (int(one_c[2]), int(one_c[3])), (int(one_c[4]), int(one_c[5])), (0,255,0), 2)
+          #  cv2.line(one_park_image, (int(one_c[4]), int(one_c[5])), (int(one_c[6]), int(one_c[7])), (0,255,0), 2)
+          #  cv2.line(one_park_image, (int(one_c[6]), int(one_c[7])), (int(one_c[0]), int(one_c[1])), (0,255,0), 2)
 
    # cv2.imshow('one_park_image', one_park_image)
  #   key = cv2.waitKey(0)

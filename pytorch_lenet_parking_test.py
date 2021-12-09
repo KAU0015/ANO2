@@ -14,6 +14,7 @@ import os
 from PIL import Image
 
 
+
 transform = transforms.Compose([
     transforms.ToTensor(),
     transforms.Resize(32)
@@ -93,7 +94,7 @@ train_images_list_lbp = []
 IMG_SIZE = 32
 
 
-net = torch.load("my_LeNet_20_epochs_32.pth")
+net = torch.load("my_LeNet_15_epochs_batch_32.pth")
 net.eval()
 
 for i in range(len(train_images_full)):

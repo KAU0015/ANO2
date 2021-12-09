@@ -92,7 +92,7 @@ train_images_list = []
 train_images_list_lbp = []
 IMG_SIZE = 224
 
-net = torch.load("my_alexnet_5_epochs.pth")
+net = torch.load("my_alexnet_epochs_10_32-----.pth")
 net.eval()
 
 for i in range(len(train_images_full)):

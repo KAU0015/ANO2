@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import torch.optim as optim
 import torch.nn.functional as F
 import os
-
+import time
 
 transform = transforms.Compose([
     transforms.ToTensor(),
@@ -56,8 +56,8 @@ def main():
   #  print(net)
 
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
-
+    optimizer = optim.SGD(net.parameters(), lr=0.01, momentum=0.9)
+    start = time.time()
     for epoch in range(10):  # loop over the dataset multiple times
 
         running_loss = 0.0
@@ -82,7 +82,10 @@ def main():
                 running_loss = 0.0
 
     print('Finished Training')
-    PATH = './my_alexnet_epochs_10_32.pth'
+    end = time.time()
+    train_time = end - start
+    print(f"Training time (s): {round(train_time, 5)}")
+    PATH = './my_alexnet_11.pth'
     torch.save(net, PATH)
 
 

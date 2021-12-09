@@ -1,7 +1,24 @@
 import cv2
 import numpy as np
 import glob
-import time
+import torchvision
+import torch
+import torch.nn as nn
+import torchvision.transforms as transforms
+import torchvision.datasets as datasets
+import numpy as np
+import matplotlib.pyplot as plt
+import torch.optim as optim
+import torch.nn.functional as F
+import os
+from PIL import Image
+
+
+transform = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Resize(224)
+    
+])
 
 def order_points(pts):
 	# initialzie a list of coordinates that will be ordered
@@ -72,39 +89,21 @@ train_images_free = [img for img in glob.glob("train_images/free/*.png")]
 
 train_labels_list = []
 train_images_list = []
-IMG_SIZE = 96
-#hog = cv2.HOGDescriptor((IMG_SIZE, IMG_SIZE), (32,32), (16,16), (8,8), 9, 1, -1, 0, 0.2, 1, 64, True)
-hog = cv2.HOGDescriptor((IMG_SIZE, IMG_SIZE), (64, 64), (32, 32), (16, 16), 9, 1, 6, 0, 0.09, 1, 64, True)
-svm = cv2.ml.SVM_create()
-svm.setType(cv2.ml.SVM_C_SVC)
-svm.setKernel(cv2.ml.SVM_INTER)
-svm.setC(100.0)
+train_images_list_lbp = []
+IMG_SIZE = 224
 
-svm.setTermCriteria((cv2.TERM_CRITERIA_MAX_ITER, 1000, 1e-6))
+
+net = torch.load("resnet_pretrained_1_epochs_batch_32_lr0001.pth")
+net.eval()
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 
 for i in range(len(train_images_full)):
-    one_park_image = cv2.imread(train_images_full[i], 0)
-    res_image = cv2.resize(one_park_image, (IMG_SIZE, IMG_SIZE))
-    hog_feature = hog.compute(res_image)
-    train_images_list.append(hog_feature)
     train_labels_list.append(1)
 
 for i in range(len(train_images_free)):
-    one_park_image = cv2.imread(train_images_free[i], 0)
-    res_image = cv2.resize(one_park_image, (IMG_SIZE, IMG_SIZE))
-    hog_feature = hog.compute(res_image)
-    train_images_list.append(hog_feature)
     train_labels_list.append(0)
 
-print("train_all ", len(train_images_list))
-
-start = time.time()
-svm.train(np.array(train_images_list), cv2.ml.ROW_SAMPLE, np.array(train_labels_list))
-#svm.save("my_hog.xml")
-end = time.time()
-train_time = end - start
-print(f"Training time (s): {round(train_time, 5)}")
-print("TRAIN HOG DONE")
 
 test_images = [img for img in glob.glob("test_images/*.jpg")]
 test_images.sort()
@@ -119,31 +118,34 @@ for img in test_images:
                 ((float(one_c[2])), float(one_c[3])),
                 ((float(one_c[4])), float(one_c[5])),
                 ((float(one_c[6])), float(one_c[7]))] 
-        #print(pts)
-        #https://www.pyimagesearch.com/2014/08/25/4-point-opencv-getperspective-transform-example/
+
         warped_image = four_point_transform(one_park_image, np.array(pts))
         res_image = cv2.resize(warped_image, (IMG_SIZE, IMG_SIZE)) 
-        gray_image = cv2.cvtColor(res_image, cv2.COLOR_BGR2GRAY)
-    
+        one_img_rgb = cv2.cvtColor(res_image, cv2.COLOR_BGR2RGB)
+        img_pil = Image.fromarray(one_img_rgb)
+        image_pytorch = transform(img_pil).to(device)
+        image_pytorch = image_pytorch.unsqueeze(0)
+        output_pytorch = net(image_pytorch)
+        _, predicted = torch.max(output_pytorch, 1)
+     #   print(predicted)
 
-        hog_feature = hog.compute(gray_image)
-        predict_label = svm.predict(np.array(hog_feature).reshape(1, -1))
-        predict_label = predict_label[1][0][0]
-        #print(predict_label)
-    
-
-        if(predict_label == 0):
-            result_list.append(0)
-          #  cv2.line(one_park_image, (int(one_c[0]), int(one_c[1])), (int(one_c[2]), int(one_c[3])), (255,0,0), 2)
-           # cv2.line(one_park_image, (int(one_c[2]), int(one_c[3])), (int(one_c[4]), int(one_c[5])), (255,0,0), 2)
-          #  cv2.line(one_park_image, (int(one_c[4]), int(one_c[5])), (int(one_c[6]), int(one_c[7])), (255,0,0), 2)
-           # cv2.line(one_park_image, (int(one_c[6]), int(one_c[7])), (int(one_c[0]), int(one_c[1])), (255,0,0), 2)
-        else:
+        if(predicted == 1):
             result_list.append(1)
-          #  cv2.line(one_park_image, (int(one_c[0]), int(one_c[1])), (int(one_c[2]), int(one_c[3])), (0,0,255), 2)
+        #    cv2.line(one_park_image, (int(one_c[0]), int(one_c[1])), (int(one_c[2]), int(one_c[3])), (0,0,255), 2)
           #  cv2.line(one_park_image, (int(one_c[2]), int(one_c[3])), (int(one_c[4]), int(one_c[5])), (0,0,255), 2)
-          #  cv2.line(one_park_image, (int(one_c[4]), int(one_c[5])), (int(one_c[6]), int(one_c[7])), (0,0,255), 2)
+         #   cv2.line(one_park_image, (int(one_c[4]), int(one_c[5])), (int(one_c[6]), int(one_c[7])), (0,0,255), 2)
           #  cv2.line(one_park_image, (int(one_c[6]), int(one_c[7])), (int(one_c[0]), int(one_c[1])), (0,0,255), 2)
+        else:
+            result_list.append(0)
+          #  cv2.line(one_park_image, (int(one_c[0]), int(one_c[1])), (int(one_c[2]), int(one_c[3])), (0,255,0), 2)
+          #  cv2.line(one_park_image, (int(one_c[2]), int(one_c[3])), (int(one_c[4]), int(one_c[5])), (0,255,0), 2)
+          #  cv2.line(one_park_image, (int(one_c[4]), int(one_c[5])), (int(one_c[6]), int(one_c[7])), (0,255,0), 2)
+          #  cv2.line(one_park_image, (int(one_c[6]), int(one_c[7])), (int(one_c[0]), int(one_c[1])), (0,255,0), 2)
+
+#    cv2.imshow('one_park_image', one_park_image)
+ #   key = cv2.waitKey(0)
+ #   if key == 27: # exit on ESC
+ #       break
 
 gt_file = open("groundtruth.txt", "r")
 gt_lines = gt_file.readlines()
@@ -171,7 +173,7 @@ print("false negatives: ", false_negatives)
 print("false positives: ", false_positives)
 acc = (true_positives + true_negatives)/(false_positives+false_negatives+true_negatives+true_positives)
 precision = true_positives / (true_positives + false_positives)
-recall = true_positives / (true_positives + false_negatives)
+recall = float(true_positives) / float(true_positives + false_negatives)
 f1 = 2.0*((precision*recall)/(precision+recall))
 
 print("acc: ", acc)
